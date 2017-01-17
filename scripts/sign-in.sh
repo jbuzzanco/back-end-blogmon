@@ -1,6 +1,6 @@
 #!/bin/bash
-EMAIL='dog@dog'
-PASSWORD='1234'
+EMAIL='adminJoel@user.com'
+PASSWORD='4568456e'
 API="http://localhost:4741"
 URL_PATH="/sign-in"
 curl "${API}${URL_PATH}" \
