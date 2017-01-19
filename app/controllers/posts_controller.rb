@@ -1,5 +1,5 @@
 class PostsController < OpenReadController
-  before_action :set_post, only: [:show, :update, :destroy]
+  before_action :set_post, only: [:update, :destroy]
 
   # GET /posts
   # GET /posts.json
@@ -30,7 +30,7 @@ class PostsController < OpenReadController
   # PATCH/PUT /posts/1
   # PATCH/PUT /posts/1.json
   def update
-    @post = Post.find(params[:id])
+    # @post = current_user.post.build(post_params)
 
     if @post.update(post_params)
       head :no_content
@@ -50,7 +50,7 @@ class PostsController < OpenReadController
   private
 
     def set_post
-      @post = Post.find(params[:id])
+      @post = current_user.posts.find(params[:id])
     end
 
     def post_params
