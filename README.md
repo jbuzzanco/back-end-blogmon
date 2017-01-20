@@ -1,303 +1,78 @@
-[![General Assembly Logo](https://camo.githubusercontent.com/1a91b05b8f4d44b5bbfb83abac2b0996d8e26c92/687474703a2f2f692e696d6775722e636f6d2f6b6538555354712e706e67)](https://generalassemb.ly/education/web-development-immersive)
-
-# rails-api-template
-
-A template for starting projects with `rails-api`. Includes authentication.
-
-At the beginning of each cohort, update the versions in [`Gemfile`](Gemfile).
-
-## Dependencies
-
-Install with `bundle install`.
-
--   [`rails-api`](https://github.com/rails-api/rails-api)
--   [`rails`](https://github.com/rails/rails)
--   [`active_model_serializers`](https://github.com/rails-api/active_model_serializers)
--   [`ruby`](https://www.ruby-lang.org/en/)
--   [`postgres`](http://www.postgresql.org)
-
-Until Rails 5 is released, this template should follow the most recent released
-version of Rails 4, as well as track `master` branches for `rails-api` and
-`active_model_serializers`.
-
-## Installation
-
-1.  [Download](../../archive/master.zip) this template.
-1.  Unzip and rename the template directory.
-1.  Empty [`README.md`](README.md) and fill with your own content.
-1.  Move into the new project and `git init`.
-1.  Install dependencies with `bundle install`.
-1.  Rename your app module in `config/application.rb` (change
-    `RailsApiTemplate`).
-1.  Rename your project database in `config/database.yml` (change
-    `'rails-api-template'`).
-1.  Create a `.env` for sensitive settings (`touch .env`).
-1.  Generate new `development` and `test` secrets (`bundle exec rake secret`).
-1.  Store them in `.env` with keys `SECRET_KEY_BASE_<DEVELOPMENT|TEST>`
-    respectively.
-1.  In order to make requests to your deployed API, you will need to set
-    `SECRET_KEY_BASE` in the environment of the production API (using `heroku
-    config:set` or the Heroku dashboard).
-1.  In order to make requests from your deployed client application, you will
-    need to set `CLIENT_ORIGIN` in the environment of the production API (e.g.
-    `heroku config:set CLIENT_ORIGIN https://<github-username>.github.io`).
-1.  Setup your database with `bin/rake db:nuke_pave` or `bundle exec rake
-    db:nuke_pave`.
-1.  Run the API server with `bin/rails server` or `bundle exec rails server`.
-
-## Structure
-
-This template follows the standard project structure in Rails 4.
-
-`curl` command scripts are stored in [`scripts`](scripts) with names that
-correspond to API actions.
-
-User authentication is built-in.
-
-## Tasks
-
-Developers should run these often!
-
--   `bin/rake routes` lists the endpoints available in your API.
--   `bin/rake test` runs automated tests.
--   `bin/rails console` opens a REPL that pre-loads the API.
--   `bin/rails db` opens your database client and loads the correct database.
--   `bin/rails server` starts the API.
--   `scripts/*.sh` run various `curl` commands to test the API. See below.
-
-<!-- TODO -   `rake nag` checks your code style. -->
-<!-- TODO -   `rake lint` checks your code for syntax errors. -->
-
-## API
-
-Use this as the basis for your own API documentation. Add a new third-level
-heading for your custom entities, and follow the pattern provided for the
-built-in user authentication documentation.
-
-Scripts are included in [`scripts`](scripts) to test built-in actions. Add your
-own scripts to test your custom API. As an alternative, you can write automated
-tests in RSpec to test your API.
-
-### Authentication
-
-| Verb   | URI Pattern            | Controller#Action |
-|--------|------------------------|-------------------|
-| POST   | `/sign-up`             | `users#signup`    |
-| POST   | `/sign-in`             | `users#signin`    |
-| PATCH  | `/change-password/:id` | `users#changepw`  |
-| DELETE | `/sign-out/:id`        | `users#signout`   |
-
-#### POST /sign-up
-
-Request:
-
-```sh
-curl http://localhost:4741/sign-up \
-  --include \
-  --request POST \
-  --header "Content-Type: application/json" \
-  --data '{
-    "credentials": {
-      "email": "'"${EMAIL}"'",
-      "password": "'"${PASSWORD}"'",
-      "password_confirmation": "'"${PASSWORD}"'"
-    }
-  }'
-```
-
-```sh
-EMAIL=ava@bob.com PASSWORD=hannah scripts/sign-up.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 201 Created
-Content-Type: application/json; charset=utf-8
-
-{
-  "user": {
-    "id": 1,
-    "email": "ava@bob.com"
-  }
-}
-```
-
-#### POST /sign-in
-
-Request:
-
-```sh
-curl http://localhost:4741/sign-in \
-  --include \
-  --request POST \
-  --header "Content-Type: application/json" \
-  --data '{
-    "credentials": {
-      "email": "'"${EMAIL}"'",
-      "password": "'"${PASSWORD}"'"
-    }
-  }'
-```
-
-```sh
-EMAIL=ava@bob.com PASSWORD=hannah scripts/sign-in.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
-{
-  "user": {
-    "id": 1,
-    "email": "ava@bob.com",
-    "token": "BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f"
-  }
-}
-```
-
-#### PATCH /change-password/:id
-
-Request:
-
-```sh
-curl --include --request PATCH "http://localhost:4741/change-password/$ID" \
-  --header "Authorization: Token token=$TOKEN" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "passwords": {
-      "old": "'"${OLDPW}"'",
-      "new": "'"${NEWPW}"'"
-    }
-  }'
-```
-
-```sh
-ID=1 OLDPW=hannah NEWPW=elle TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/change-password.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 204 No Content
-```
-
-#### DELETE /sign-out/:id
-
-Request:
-
-```sh
-curl http://localhost:4741/sign-out/$ID \
-  --include \
-  --request DELETE \
-  --header "Authorization: Token token=$TOKEN"
-```
-
-```sh
-ID=1 TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/sign-out.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 204 No Content
-```
-
-### Users
-
-| Verb | URI Pattern | Controller#Action |
-|------|-------------|-------------------|
-| GET  | `/users`    | `users#index`     |
-| GET  | `/users/1`  | `users#show`      |
-
-#### GET /users
-
-Request:
-
-```sh
-curl http://localhost:4741/users \
-  --include \
-  --request GET \
-  --header "Authorization: Token token=$TOKEN"
-```
-
-```sh
-TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/users.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
-{
-  "users": [
-    {
-      "id": 2,
-      "email": "bob@ava.com"
-    },
-    {
-      "id": 1,
-      "email": "ava@bob.com"
-    }
-  ]
-}
-```
-
-#### GET /users/:id
-
-Request:
-
-```sh
-curl --include --request GET http://localhost:4741/users/$ID \
-  --header "Authorization: Token token=$TOKEN"
-```
-
-```sh
-ID=2 TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/user.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
-{
-  "user": {
-    "id": 2,
-    "email": "bob@ava.com"
-  }
-}
-```
-
-### Reset Database without dropping
-
-This is not a task developers should run often, but it is sometimes necessary.
-
-- locally
-
-```sh
-bin/rake db:migrate VERSION=0
-bin/rake db:migrate db:seed db:examples
-```
-
-- heroku
-
-```sh
-heroku run rake db:migrate VERSION=0
-heroku run rake db:migrate db:seed db:examples
-```
-
-
-bin/rake db:migrate VERSION=0
-
-## [License](LICENSE)
-
-1.  All content is licensed under a CC­BY­NC­SA 4.0 license.
-1.  All software code is licensed under GNU GPLv3. For commercial use or
-    alternative licensing, please contact legal@ga.co.
+# Blogmon's API
+### Blogmon, a blog built with Rails and Ember, by Joel
+
+![front page](http://i.imgur.com/StfqV7H.png "Front-Page")
+
+## Links to Repositories and Deployed Sites in this full stack web application
+
+- front-end repository https://github.com/jbuzzanco/blogmon
+- back-end repository--you are currently on this https://github.com/jbuzzanco/back-end-blogmon
+- front-end github-pages https://jbuzzanco.github.io/blogmon
+- back-end heroku https://blogmon-portfolio.herokuapp.com/
+
+
+## Technologies Used
+- HTML5
+  - the structure of webpage
+- SASS
+  - the style of webpage
+- Ember
+  - the routing and views of webpage
+  - Handlebars
+    - part of Ember that allows for Javascript objects embedded with HTML
+- JavaScript
+  - the behaviour and interaction with webpage
+- Ruby on Rails
+  - Supports and constraints the front-end in order to work as expected
+
+
+## Approach towards building this Blog application
+
+The approach that I took, started off with wireframing, and looking at other blogs to get
+some inspiration for what I wanted my application to look be laid out like. Then I began writing
+some user stories in order to better map out what I wanted my application to do.
+
+Upon having user stories and rough wireframes, I didn't waste time to get started building. I began to build
+out the backend with Ruby on Rails, taking full advantage of the Rails command line to generate scaffolds, and routes,
+which is one reason why I chose rails, is it's ability to generate from the command line, as this was an application
+that needed to be built swiftly.
+
+After having the back-end functional, I began with the client of the application. The client was built with ember.
+As with rails commands, I began using Ember CLI commands from the command line in order to generate the
+necessary resources and routes and components. I found it nice to be able to generate from the command line in order to know that
+the files are named appropriately and in the correct location.
+
+Ember is what took the majority of the time, as it was a new framework, and took some getting used to. Editing the generated routes and templates and components is the game from there. Ember is great for having different views on different routes, which
+is what a lot of Web Development consists of in real production environments. Ember was a great framework to learn.
+
+
+## User stories
+- [x] As a authenticated user/admin I can create blogs.
+- [x] As a authenticated user/admin I can edit blogs.
+- [x] As a authenticated user/admin I can delete blogs.
+- [x] As a authenticated user/admin I can view blogs.
+- [x] As a visitor, I can view blogs
+- [ ] As a authenticated user/admin I can view comments (improvement)
+- [ ] As a visitor, I can comment on blogs (improvement)
+- [ ] As a visitor, I can view comments on blogs (improvement)
+- [ ] As a authenticated user/admin I can create comments (improvement)
+
+## ERD
+- [Sketch of Entity Relationship Diagram](http://imgur.com/8787D7p)
+
+
+
+## Wireframes/ sketches
+
+- [blog posts sketch](http://imgur.com/jvqc2Pw)
+- [blog post individual sketch](http://imgur.com/LmKizOD)
+- [comments section sketch](http://imgur.com/kCttsWM)
+
+## Further Polishing, and troubles in development stage
+
+
+A big trouble was learning how the hierarchy of ember works, and to generate components and how the relate to the resources, all within a week's time. It was stressful learning and implementing Ember in such
+Also generating an application adapter from the command line took some time to figure out what was going wrong, before realizing it got rid of importing ember!
+
+As it can be improved, I would like to have styling be better. With formatting, colors, fonts. Also, I would like to
+have an excerpt section from the body of the blog post that sticks out in bigger font for creative design.
